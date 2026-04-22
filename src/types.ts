@@ -9,94 +9,139 @@ export interface AxisMarker {
   measure: Measure;
   label: string;
   align?: "start" | "middle" | "end";
+  lane?: 0 | 1;
 }
 
-interface BaseItem {
+export interface SpacingSegment {
+  start: Measure;
+  end: Measure;
+  weight: number;
+  minWidth?: number;
+}
+
+export interface SpacingProfile {
+  segments: SpacingSegment[];
+}
+
+export type AnchorSpec =
+  | { type: "measure"; measure: Measure }
+  | { type: "rangeStart"; range: MeasureRange }
+  | { type: "rangeCenter"; range: MeasureRange }
+  | { type: "rangeEnd"; range: MeasureRange }
+  | { type: "segmentInsetStart"; segmentId: string; inset: number }
+  | { type: "segmentInsetEnd"; segmentId: string; inset: number }
+  | { type: "opticalClusterCenter"; segmentId: string };
+
+export interface TextBlock {
   id: string;
-}
-
-export interface DividerItem extends BaseItem {
-  type: "divider";
-  measure: Measure;
-  y1: number;
-  y2: number;
-  weight?: "thin" | "thick";
-}
-
-export interface SectionItem extends BaseItem {
-  type: "section";
-  range: MeasureRange;
-  title: string;
-  subtitle?: string;
-  titleY: number;
-  subtitleY?: number;
-  align?: "start" | "center";
-  titleStyle?: "regular" | "italic";
-  subtitleStyle?: "regular" | "italic";
-  titleWeight?: "regular" | "semibold" | "bold";
-}
-
-export interface AnnotationItem extends BaseItem {
-  type: "annotation";
-  measure: Measure;
-  y: number;
-  text: string;
+  lines: string[];
+  slot: "title" | "subtitle" | "detail" | "baseline" | "label";
+  anchor: AnchorSpec;
   align?: "start" | "center" | "end";
   style?: "regular" | "italic";
   weight?: "regular" | "semibold" | "bold";
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
-export interface ArrowItem extends BaseItem {
+export interface DividerConnector {
+  id: string;
+  type: "divider";
+  measure: Measure;
+  weight?: "thin" | "thick";
+}
+
+export interface ArrowConnector {
+  id: string;
   type: "arrow";
   range: MeasureRange;
-  y: number;
-  lineWeight?: "thin" | "thick";
+  slot: "baseline";
+  weight?: "thin" | "thick";
   startDot?: boolean;
-  labelStart?: string;
-  labelCenter?: string;
-  labelEnd?: string;
+  startLabel?: string;
+  centerLabel?: string;
+  endLabel?: string[];
+  labelWeight?: "regular" | "semibold" | "bold";
 }
 
-export interface BracketItem extends BaseItem {
+export interface BracketConnector {
+  id: string;
   type: "bracket";
   range: MeasureRange;
-  y: number;
+  slot: "baseline";
   label: string;
-  labelY: number;
 }
 
-export interface CadenceItem extends BaseItem {
+export interface CadenceConnector {
+  id: string;
   type: "cadence";
   range: MeasureRange;
-  y: number;
+  slot: "baseline";
   leftLabel: string;
   rightLabel: string;
   caption: string;
-  captionY: number;
 }
 
-export type TimelineItem =
-  | DividerItem
-  | SectionItem
-  | AnnotationItem
-  | ArrowItem
-  | BracketItem
-  | CadenceItem;
+export type ConnectorSpec =
+  | DividerConnector
+  | ArrowConnector
+  | BracketConnector
+  | CadenceConnector;
 
-export interface FormRow {
+export interface LaneBase {
   id: string;
   name: string;
   description: string;
   height: number;
-  items: TimelineItem[];
 }
 
-export interface FormDiagram {
+export interface SectionSegment {
+  id: string;
+  range: MeasureRange;
+  title: TextBlock;
+  blocks?: TextBlock[];
+}
+
+export interface SectionLaneSpec extends LaneBase {
+  type: "sectionLane";
+  segments: SectionSegment[];
+  connectors: DividerConnector[];
+}
+
+export interface ProcessLaneSpec extends LaneBase {
+  type: "processLane";
+  connectors: ArrowConnector[];
+}
+
+export interface TelosLaneSpec extends LaneBase {
+  type: "telosLane";
+  textBlocks: TextBlock[];
+  connectors: ArrowConnector[];
+}
+
+export interface PhaseLaneSpec extends LaneBase {
+  type: "phaseLane";
+  textBlocks: TextBlock[];
+  connectors: BracketConnector[];
+}
+
+export interface CadenceLaneSpec extends LaneBase {
+  type: "cadenceLane";
+  connectors: CadenceConnector[];
+}
+
+export type LaneSpec =
+  | SectionLaneSpec
+  | ProcessLaneSpec
+  | TelosLaneSpec
+  | PhaseLaneSpec
+  | CadenceLaneSpec;
+
+export interface DiagramSpec {
   title: string;
   subtitle: string;
-  quote: string;
+  caption?: string;
   measureExtent: MeasureRange;
-  axisMarkers: AxisMarker[];
-  rows: FormRow[];
+  spacingProfile: SpacingProfile;
+  measureMarkers: AxisMarker[];
+  lanes: LaneSpec[];
 }

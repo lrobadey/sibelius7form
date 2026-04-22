@@ -3,7 +3,7 @@ import { figure35 } from "./data/figure35";
 import { TimelineDiagram } from "./components/TimelineDiagram";
 
 const initialVisibility = Object.fromEntries(
-  figure35.rows.map((row) => [row.id, true]),
+  figure35.lanes.map((row) => [row.id, true]),
 ) as Record<string, boolean>;
 
 function App() {
@@ -12,8 +12,8 @@ function App() {
   const [soloRowId, setSoloRowId] = useState<string | null>(null);
 
   const visibleRows = soloRowId
-    ? figure35.rows.filter((row) => row.id === soloRowId)
-    : figure35.rows.filter((row) => visibility[row.id]);
+    ? figure35.lanes.filter((row) => row.id === soloRowId)
+    : figure35.lanes.filter((row) => visibility[row.id]);
 
   function toggleRow(rowId: string) {
     setVisibility((current) => {
@@ -39,22 +39,22 @@ function App() {
 
   return (
     <main className="page">
-      <section className="hero">
-        <div className="hero-copy">
-          <p className="eyebrow">{figure35.title}</p>
+      <section className="figure-header">
+        <p className="eyebrow">{figure35.title}</p>
+        <div className="figure-heading">
           <h1>{figure35.subtitle}</h1>
-          <p className="quote">{figure35.quote}</p>
+          <p>{figure35.caption}</p>
         </div>
       </section>
 
-      <section className="controls" aria-label="Diagram layer controls">
-        {figure35.rows.map((row) => {
+      <section className="figure-toolbar" aria-label="Diagram layer controls">
+        {figure35.lanes.map((row) => {
           const isSolo = soloRowId === row.id;
           const isVisible = visibility[row.id];
 
           return (
-            <article key={row.id} className="layer-control">
-              <div className="layer-copy">
+            <article key={row.id} className="lane-toggle">
+              <div className="lane-copy">
                 <h2>{row.name}</h2>
                 <p>{row.description}</p>
               </div>
@@ -81,7 +81,7 @@ function App() {
         })}
       </section>
 
-      <section className="diagram-panel">
+      <section className="diagram-panel" aria-label="Figure 3.5 diagram">
         <TimelineDiagram rows={visibleRows} />
       </section>
     </main>

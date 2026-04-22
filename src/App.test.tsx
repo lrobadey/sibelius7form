@@ -40,4 +40,11 @@ describe("App", () => {
     expect(screen.getAllByText("Slow").length).toBeGreaterThan(0);
     expect(screen.getByText("Telos I")).toBeInTheDocument();
   });
+
+  it("renders the compact figure header", () => {
+    render(<App />);
+
+    expect(screen.getAllByText("Figure 3.5").length).toBeGreaterThan(0);
+    expect(screen.getByRole("heading", { name: "Formal Design Counterpoint" })).toBeInTheDocument();
+  });
 });
